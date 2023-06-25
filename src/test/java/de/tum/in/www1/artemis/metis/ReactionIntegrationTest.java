@@ -433,6 +433,33 @@ class ReactionIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJi
         assertThat(reactionRepository.findById(reactionToBeDeleted.getId())).isEmpty();
     }
 
+    @Test
+    @WithMockUser(username = TEST_PREFIX + "student1", roles = "USER")
+    void testReactionDoesNotEditPost() throws Exception {
+        Post postReactedOn = existingPostsWithAnswers.get(0);
+        Reaction reactionToSaveOnPost = createReactionOnPost(postReactedOn);
+
+        request.postWithResponseBody("/api/courses/" + courseId + "/postings/reactions", reactionToSaveOnPost, Reaction.class, HttpStatus.CREATED);
+
+        Post postInDb = postRepository.findById(postReactedOn.getId()).orElseThrow();
+        assertThat(postInDb.getUpdatedDate()).isNull();
+    }
+
+    @Test
+    @WithMockUser(username = TEST_PREFIX + "student1", roles = "USER")
+    void testRemovingReactionDoesNotEditPost() throws Exception {
+        Post postReactedOn = existingPostsWithAnswers.get(0);
+        Reaction reactionToSaveOnPost = createReactionOnPost(postReactedOn);
+
+        Reaction createdReaction = request.postWithResponseBody("/api/courses/" + courseId + "/postings/reactions", reactionToSaveOnPost, Reaction.class, HttpStatus.CREATED);
+
+        // delete reaction
+        request.delete("/api/courses/" + courseId + "/postings/reactions/" + createdReaction.getId(), HttpStatus.OK);
+
+        Post postInDb = postRepository.findById(postReactedOn.getId()).orElseThrow();
+        assertThat(postInDb.getUpdatedDate()).isNull();
+    }
+
     // HELPER METHODS
 
     private Reaction createReactionOnPost(Post postReactedOn) {

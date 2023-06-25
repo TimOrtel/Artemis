@@ -459,6 +459,7 @@ class PostIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTe
         Post updatedPost = request.putWithResponseBody("/api/courses/" + courseId + "/posts/" + postToUpdate.getId(), postToUpdate, Post.class, HttpStatus.OK);
         conversationUtilService.assertSensitiveInformationHidden(updatedPost);
         assertThat(updatedPost).isEqualTo(postToUpdate);
+        assertThat(updatedPost.getUpdatedDate()).isNotNull();
     }
 
     @Test
@@ -526,6 +527,7 @@ class PostIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTe
         Post updatedPost = request.putWithResponseBody("/api/courses/" + courseId + "/posts/" + postToUpdate.getId(), postToUpdate, Post.class, HttpStatus.OK);
         conversationUtilService.assertSensitiveInformationHidden(updatedPost);
         assertThat(updatedPost).isEqualTo(postToUpdate);
+        assertThat(updatedPost.getUpdatedDate()).isNotNull();
 
         // update post from another student (index 1)--> forbidden
         Post postToNotUpdate = editExistingPost(existingPosts.get(1));
@@ -597,6 +599,30 @@ class PostIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTe
                 params);
         conversationUtilService.assertSensitiveInformationHidden(updatedPost);
         assertThat(updatedPost).isEqualTo(postToPin);
+
+        if (postToPin.getUpdatedDate() == null) {
+            // Pinning must not set an updated date!
+            assertThat(updatedPost.getUpdatedDate()).isNull();
+        }
+    }
+
+    @Test
+    @WithMockUser(username = TEST_PREFIX + "tutor1", roles = "TA")
+    void testPinEditedPost_asTutor() throws Exception {
+        // update post of student1 (index 0)--> OK
+        Post postToUpdate = editExistingPost(existingPosts.get(0));
+
+        Post updatedPost = request.putWithResponseBody("/api/courses/" + courseId + "/posts/" + postToUpdate.getId(), postToUpdate, Post.class, HttpStatus.OK);
+        assertThat(updatedPost.getUpdatedDate()).isNotNull();
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("displayPriority", DisplayPriority.PINNED.toString());
+
+        Post pinnedPost = request.putWithResponseBodyAndParams("/api/courses/" + courseId + "/posts/" + updatedPost.getId() + "/display-priority", null, Post.class, HttpStatus.OK,
+                params);
+
+        // Pinning must not remove updated date.
+        assertThat(pinnedPost.getUpdatedDate()).isNotNull();
     }
 
     @Test
@@ -624,6 +650,30 @@ class PostIntegrationTest extends AbstractSpringIntegrationBambooBitbucketJiraTe
                 HttpStatus.OK, params);
         conversationUtilService.assertSensitiveInformationHidden(updatedPost);
         assertThat(updatedPost).isEqualTo(postToArchive);
+
+        if (postToArchive.getUpdatedDate() == null) {
+            // Archiving must not set an updated date!
+            assertThat(updatedPost.getUpdatedDate()).isNull();
+        }
+    }
+
+    @Test
+    @WithMockUser(username = TEST_PREFIX + "tutor1", roles = "TA")
+    void testArchiveEditedPost_asTutor() throws Exception {
+        // update post of student1 (index 0)--> OK
+        Post postToUpdate = editExistingPost(existingPosts.get(0));
+
+        Post updatedPost = request.putWithResponseBody("/api/courses/" + courseId + "/posts/" + postToUpdate.getId(), postToUpdate, Post.class, HttpStatus.OK);
+        assertThat(updatedPost.getUpdatedDate()).isNotNull();
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("displayPriority", DisplayPriority.ARCHIVED.toString());
+
+        Post pinnedPost = request.putWithResponseBodyAndParams("/api/courses/" + courseId + "/posts/" + updatedPost.getId() + "/display-priority", null, Post.class, HttpStatus.OK,
+                params);
+
+        // Archiving must not remove updated date.
+        assertThat(pinnedPost.getUpdatedDate()).isNotNull();
     }
 
     // GET

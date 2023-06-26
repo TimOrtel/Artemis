@@ -19,6 +19,7 @@ import {
     metisLecture,
     metisLecturePosts,
 } from '../../../../helpers/sample/metis-sample-data';
+import { getElement } from '../../../../helpers/utils/general.utils';
 
 describe('PostingContentComponent', () => {
     let component: PostingContentComponent;
@@ -133,6 +134,26 @@ describe('PostingContentComponent', () => {
         const ninthMatch = { startIndex: 395, endIndex: 459, referenceType: ReferenceType.ATTACHMENT } as PatternMatch;
 
         expect(component.getPatternMatches()).toEqual([firstMatch, secondMatch, thirdMatch, fourthMatch, fifthMatch, sixthMatch, seventhMatch, eightMatch, ninthMatch]);
+    });
+
+    it('should display edited text when post is edited', () => {
+        component.isEdited = true;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        const x = getElement(fixture.debugElement, '.edited-text');
+
+        expect(x).not.toBeNull();
+    });
+
+    it('should not display edited text when post is not edited', () => {
+        component.isEdited = false;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        const x = getElement(fixture.debugElement, '.edited-text');
+
+        expect(x).toBeNull();
     });
 
     describe('Computing posting content parts', () => {

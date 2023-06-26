@@ -114,6 +114,16 @@ export const metisPostExerciseUser1 = {
     creationDate: undefined,
 } as Post;
 
+export const metisPostExerciseUser1Edited = {
+    id: 5,
+    author: metisUser1,
+    exercise: metisExercise,
+    title: 'title',
+    content: 'metisPostExerciseUser1',
+    creationDate: undefined,
+    updatedDate: dayjs(),
+} as Post;
+
 export const metisPostExerciseUser2 = {
     id: 6,
     author: metisUser2,

@@ -12,7 +12,17 @@ import { MetisService } from 'app/shared/metis/metis.service';
 import { FaIconComponent } from '@fortawesome/angular-fontawesome';
 import { PageType } from 'app/shared/metis/metis.util';
 import { TranslatePipeMock } from '../../../../helpers/mocks/service/mock-translate.service';
-import { metisExercise, metisLecture, metisPostExerciseUser1, metisPostLectureUser1, metisPostTechSupport } from '../../../../helpers/sample/metis-sample-data';
+import { By } from '@angular/platform-browser';
+
+import {
+    metisExercise,
+    metisLecture,
+    metisPostExerciseUser1,
+    metisPostExerciseUser1Edited,
+    metisPostExerciseUser2,
+    metisPostLectureUser1,
+    metisPostTechSupport,
+} from '../../../../helpers/sample/metis-sample-data';
 import { MockQueryParamsDirective, MockRouterLinkDirective } from '../../../../helpers/mocks/directive/mock-router-link.directive';
 import { RouterTestingModule } from '@angular/router/testing';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
@@ -173,5 +183,23 @@ describe('PostComponent', () => {
         const postFooterOpenCreateAnswerPostModal = jest.spyOn(component.postFooterComponent, 'openCreateAnswerPostModal');
         component.openCreateAnswerPostModal();
         expect(postFooterOpenCreateAnswerPostModal).toHaveBeenCalledOnce();
+    });
+
+    it('should set content component as edited when edited', () => {
+        component.posting = metisPostExerciseUser1Edited;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        const x = debugElement.query(By.directive(PostingContentComponent));
+        expect(x.componentInstance.isEdited).toBeTruthy();
+    });
+
+    it('should set content component as not edited when not edited', () => {
+        component.posting = metisPostExerciseUser1;
+        component.ngOnInit();
+        fixture.detectChanges();
+
+        const x = debugElement.query(By.directive(PostingContentComponent));
+        expect(x.componentInstance.isEdited).toBeFalsy();
     });
 });
